@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
 
 const useSchema = mongoose.Schema({
     name: {
@@ -13,16 +13,23 @@ const useSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    bio: {
-        type: String,
+    uid: {
+        type: String
     },
-    image: {
+    profile: {
         type: String,
         default: "https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png"
     },
-    university: {
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpires: {
+        type: Date
+    },
+    phoneNumber: {
         type: String,
         required: true,
+        default: "No Phone"
     }
 }, {
     timestamps: true
@@ -30,4 +37,4 @@ const useSchema = mongoose.Schema({
 
 const User = mongoose.model('User', useSchema)
 
-module.exports = User
+export default User

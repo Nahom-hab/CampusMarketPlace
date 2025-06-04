@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const Admin = require('../models/admin.js');
+import jwt from 'jsonwebtoken';
+import Admin from '../models/admin.js';
 
-const isAdmin = async (req, res, next) => {
+export const isAdmin = async (req, res, next) => {
     const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
 
     if (!token) {
@@ -24,4 +24,3 @@ const isAdmin = async (req, res, next) => {
         res.status(401).json({ message: "Token is not valid" });
     }
 };
-module.exports = isAdmin

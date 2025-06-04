@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const Company = require('../models/Seller.js');
+import jwt from 'jsonwebtoken';
+import Company from '../models/Seller.js';
 
-const isSeller = async (req, res, next) => {
+export const isSeller = async (req, res, next) => {
     const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
 
     if (!token) {
@@ -24,5 +24,3 @@ const isSeller = async (req, res, next) => {
         res.status(401).json({ message: "Token is not valid" });
     }
 };
-
-module.exports = isSeller

@@ -1,33 +1,23 @@
 // routes/productRoutes.js
-const express = require("express");
-const router = express.Router();
-const multer = require('multer');
-const { addComment, deleteProduct, updateProduct, getProductsBySellerId, getProductById, searchProducts, getProducts, createProduct } = require("../controller/product.controller");
-
-// Configure multer
+import express from "express";
+import {
+    createProduct,
+    getProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct,
+    getProductsBySellerId,
+} from "../controller/product.controller.js";
+import multer from 'multer'
 const storage = multer.memoryStorage();
-const upload = multer({
-    storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed!'), false);
-        }
-    }
-});
+const upload = multer({ storage });
+const router = express.Router();
 
-// Product routes
-router.post('/', upload.array('files', 5), createProduct);
-router.get('/', getProducts);
-router.get('/search', searchProducts);
-router.get('/:id', getProductById);
-router.get('/seller/:id', getProductsBySellerId);
-router.put('/:id', upload.array('files', 5), updateProduct);
-router.delete('/:id', deleteProduct);
-router.post('/:id/reviews', addComment);
+router.post("/", upload.array('images'), createProduct);
+router.get("/", getProducts);
+router.get("/:id", getProductById);
+router.patch("/:id", upload.array('images'), updateProduct);
+router.delete("/:id", deleteProduct);
+router.get('/seller/:id', getProductsBySellerId)
 
-module.exports = router;
+export default router;

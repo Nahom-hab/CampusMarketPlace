@@ -1,5 +1,5 @@
-const cloudinary = require('cloudinary').v2;
-const dotenv = require('dotenv');
+import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -42,4 +42,4 @@ const uploadImageToCloudinary = async (file) => {
     }
 };
 
-module.exports = uploadImageToCloudinary;
+export default uploadImageToCloudinary;

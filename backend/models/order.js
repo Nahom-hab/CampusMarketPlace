@@ -1,5 +1,4 @@
-const mongoose = require("mongoose")
-
+import mongoose from "mongoose";
 
 // Define a schema for order items
 const OrderItemSchema = mongoose.Schema({
@@ -11,29 +10,18 @@ const OrderItemSchema = mongoose.Schema({
     amount: {
         type: Number,
         required: true
-    },
-    product_status: {
-        type: String,
-        required: true,
-        enum: ['pending', 'delivered', 'cancelled'],
-        default: 'pending'
-    },
-    price: {
-        type: Number,
-        required: true
     }
-    ,
-    sellerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    }
-}, { _id: false });
+}, { _id: false }); // Disable `_id` for subdocuments if not needed
 
 // Define the main Order schema
 const OrderSchema = mongoose.Schema({
     user_Id: {
         type: String,
+        // required: true
+    },
+    fullName: {
+        type: String,
+        required: true
     },
     bankRecipt: {
         type: String,
@@ -42,28 +30,31 @@ const OrderSchema = mongoose.Schema({
     phoneNumber: {
         type: String,
         required: true
+        // Add regex for phone number validation if needed
     },
     selectedBank: {
         type: String,
         required: true
     },
-    address: {
+    address: { // Corrected typo here
         type: String,
         required: true
     },
-    order: [OrderItemSchema],
+    totalPrice: {
+        type: Number,
+        required: true
+    },
+    order: [OrderItemSchema], // Use the nested schema here
     order_status: {
         type: String,
         required: true,
-        enum: ['pending', 'accepted']
+        enum: ['pending', 'accepted', 'delivered', 'cancelled']
     }
 }, {
-    timestamps: true
+    timestamps: true // Adds `createdAt` and `updatedAt` fields
 });
 
 // Create the Order model
 const Order = mongoose.model('Order', OrderSchema);
 
-
-module.exports = Order
-
+export default Order;

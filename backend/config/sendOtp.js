@@ -1,13 +1,13 @@
-const { Resend } = require('resend');
+import { Resend } from 'resend';
 
 const resend = new Resend('re_EoJh38Ca_EsRYvDr736k3G6WWs3tqocq2'); // Your API key
 
-const sendEmailOtp = async (email, otp) => {
+export const sendEmailOtp = async (email, otp) => {
     console.log('Sending OTP to:', otp);
     // try {
     //     // Temporarily force sending to your verified email for testing
     //     const testEmail = 'nahomhabtamu147@gmail.com';
-    // 
+
     //     const data = await resend.emails.send({
     //         from: 'onboarding@resend.dev',
     //         to: testEmail, // Send to yourself for now
@@ -22,5 +22,3 @@ const sendEmailOtp = async (email, otp) => {
     //     throw error;
     // }
 }
-
-module.exports = { sendEmailOtp };

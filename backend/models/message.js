@@ -1,18 +1,13 @@
 import mongoose from "mongoose"
 
 const messageSchema = mongoose.Schema({
-    SenderIsSeller: {
+    SenderIsAdmin: {
         type: Boolean,
         required: true,
     },
     sellerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Seller',
-        required: true,
-    },
-    buyerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
         required: true,
     },
     message: {
@@ -33,6 +28,6 @@ const messageSchema = mongoose.Schema({
     timestamps: true
 })
 
-const UserMessage = mongoose.model('UserMessage', messageSchema)
+const Message = mongoose.model('Message', messageSchema)
 
-export default UserMessage
+export default Message
