@@ -10,12 +10,14 @@ import {
     Entypo
 } from '@expo/vector-icons';
 import tw from 'twrnc';
+
 import ProductCard from '../component/ProductCard';
 import useUser from '../zustand/useUser';
 
 const Search = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
+
     const [filteredProducts, setFilteredProducts] = useState([]);
     const { products } = useUser();
 
@@ -78,6 +80,7 @@ const Search = ({ navigation }) => {
     return (
         <View style={tw`flex-1 bg-gray-50`}>
             {/* Search Header */}
+
             <View style={tw`bg-green-700 p-4`}>
                 <View style={tw`flex-row items-center`}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -86,11 +89,13 @@ const Search = ({ navigation }) => {
                     <View style={tw`flex-1 ml-4 bg-white rounded-full px-4 py-[2px] flex-row items-center`}>
                         <Ionicons name="search" size={20} color="gray" />
                         <TextInput
+
                             style={tw`ml-2 h-10 flex-1 text-base`}
                             placeholder="Search for items..."
                             placeholderTextColor="#9CA3AF"
                             value={searchQuery}
                             onChangeText={setSearchQuery}
+                            
                             autoFocus={true}
                             returnKeyType="search"
                         />
