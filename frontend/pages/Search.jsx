@@ -161,7 +161,7 @@ const Search = ({ navigation }) => {
                 <View style={tw`flex-1 items-center -mt-[700px] justify-center p-8`}>
                     <MaterialIcons
                         name="search-off"
-                        size={60}
+                        size={59}
                         color="#D1D5DB"
                         style={tw`mb-4`}
                     />
