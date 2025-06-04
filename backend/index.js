@@ -1,22 +1,16 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import path from 'path';
-import axios from 'axios';
-import { fileURLToPath } from 'url';
+const express = require('express');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const path = require('path');
+const axios = require('axios');
 
-
-import ProductRoute from '../backend/route/product.route.js'
-import adminRoute from '../backend/route/admin.route.js'
-import FeedBackRoute from '../backend/route/feedback.route.js'
-import OrderRoute from '../backend/route/order.route.js'
-import authRouter from '../backend/route/auth.route.js'
-import messageRouter from '../backend/route/message.route.js'
-import sellerRoute from '../backend/route/seller.route.js'
-import userMessageRoute from '../backend/route/Usermessage.route.js'
-import notficationRoute from '../backend/route/notfication.route.js'
+const ProductRoute = require('./route/product.route.js');
+const adminRoute = require('./route/admin.route.js');
+const OrderRoute = require('./route/order.route.js');
+const authRouter = require('./route/auth.route.js');
+const userMessageRoute = require('./route/Usermessage.route.js');
 
 const app = express();
 dotenv.config();
@@ -28,29 +22,19 @@ mongoose.connect(process.env.MONGO_URI, {
     .catch((error) => console.log("MongoDB connection error:", error));
 
 
-// Get the absolute path to our backend
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 app.use(cors());
 app.use(express.json());
 
-
-app.use('/api/product', ProductRoute)
-app.use('/api/feedback', FeedBackRoute)
-app.use('/api/admin', adminRoute)
-app.use('/api/auth', authRouter)
-app.use('/api/message', messageRouter)
-app.use('/api/order', OrderRoute)
-app.use('/api/seller', sellerRoute)
-app.use('/api/user-message', userMessageRoute)
-app.use('/api/notfication', notficationRoute)
-
-
+app.use('/api/products', ProductRoute);
+app.use('/api/admin', adminRoute);
+app.use('/api/auth', authRouter);
+app.use('/api/order', OrderRoute);
+app.use('/api/message', userMessageRoute);
 
 // Serve static files from the frontend
 app.use(express.static(path.join(__dirname, '/frontend/dist')));
-  
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/frontend/dist/index.html'));
 });
@@ -67,10 +51,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-app.listen(6000, () => {
+app.listen(8000, () => {
     console.log("Server is running on port 8000");
 });
-
 
 // Initialize payment endpoint
 app.post('/api/payment/initialize', async (req, res) => {

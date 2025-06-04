@@ -1,77 +1,79 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
-const productSchema = mongoose.Schema({
+const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Product name is required']
+        required: [true, 'Product name is required'],
+        trim: true
     },
     sellerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
-    },
-    isAvailable: {
-        type: Boolean,
-        default: true
+        ref: 'User',
+        required: [true, 'Seller ID is required']
     },
     description: {
         type: String,
-        required: [true, 'Product description is required']
+        required: [true, 'Product description is required'],
+        trim: true
     },
     price: {
         type: Number,
         required: [true, 'Product price is required'],
-        min: [0, 'Price cannot be less than 0']
+        min: [0, 'Price cannot be negative']
     },
     discount: {
         type: Number,
         default: 0,
-        required: false
+        min: [0, 'Discount cannot be negative'],
+        max: [100, 'Discount cannot exceed 100%']
     },
-    ProductCategory: {
+    productCategory: {
         type: String,
-        enum: [
-            "bed",
-            "sofa",
-            "couch",
-            "chair",
-            "table",
-            "dining_table",
-            "tv_stand",
-            "cupboard",
-            "wardrobe",
-            "office",
-            "nightstand",
-            "dresser",
-            "bookshelf",
-            "desk",
-            "bench",
-            "ottoman",
-            "stool",
-            "bar_stool",
-            "storage_chest",
-            "bunk_bed",
-            "crib",
-            "accessory",
-            "other"
-        ],
-        required: [true, "Furniture Category is required"]
+        required: [true, 'Product category is required'],
+        enum: {
+            values: ['electronics', 'clothing', 'home', 'beauty', 'books', 'food', 'other'],
+            message: 'Invalid product category'
+        }
     },
-
-   
-    tags: [{
-        type: String,
-    }],
+    tags: {
+        type: [String],
+        default: []
+    },
     images: [{
-        type: String,
-        required: true,
+        type: String, // URL to the stored image
+        required: true
     }],
-   
+    deliveryMethod: {
+        type: String,
+        enum: ['pickup', 'delivery', 'both'],
+        default: 'both'
+    },
+    comments: [{
+        profile: {
+            type: String
+        },
+        name: {
+            type: String
+        },
+        comment: {
+            type: String
+        }
+    }],
+    stock: {
+        type: Number,
+        default: 0,
+        min: [0, 'Stock cannot be negative']
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    }
 }, {
     timestamps: true
 });
 
+
+
 const Product = mongoose.model('Product', productSchema);
 
-export default Product;
-
+module.exports = Product;

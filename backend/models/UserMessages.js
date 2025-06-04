@@ -1,16 +1,12 @@
-import mongoose from "mongoose"
+const mongoose = require("mongoose");
 
 const messageSchema = mongoose.Schema({
-    SenderIsSeller: {
-        type: Boolean,
-        required: true,
-    },
-    sellerId: {
+    senderId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Seller',
+        ref: 'User',
         required: true,
     },
-    buyerId: {
+    reciverId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
@@ -26,13 +22,22 @@ const messageSchema = mongoose.Schema({
     caption: {
         type: String,
     },
+    isRead: {
+        type: Boolean,
+        default: false
+    },
+    readAt: {
+        type: Date
+    },
     ReplyMessageID: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'UserMessage',
+        default: null
     }
 }, {
     timestamps: true
-})
+});
 
-const UserMessage = mongoose.model('UserMessage', messageSchema)
+const UserMessage = mongoose.model('UserMessage', messageSchema);
 
-export default UserMessage
+module.exports = UserMessage;

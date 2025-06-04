@@ -1,24 +1,36 @@
-import mongoose from "mongoose"
+const mongoose = require("mongoose");
 
 const UserconversationSchema = mongoose.Schema({
-    buyerId: {
+    participants: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
         required: true,
-    },
-    sellerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Seller',
-        required: true,
-    },
+        ref: 'User'
+    }],
     messages: [{
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'UserMessage',
         required: true,
-    }]
+    }],
+    latestMessage: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'UserMessage'
+    },
+    unreadCount: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true
-})
+});
 
-const UserConversation = mongoose.model('UserConversation', UserconversationSchema)
+// Add hook to update latest message and unread count
+UserconversationSchema.pre('save', function (next) {
+    if (this.isModified('messages')) {
+        this.latestMessage = this.messages[this.messages.length - 1];
+    }
+    next();
+});
 
-export default UserConversation
+const UserConversation = mongoose.model('UserConversation', UserconversationSchema);
+
+module.exports = UserConversation;

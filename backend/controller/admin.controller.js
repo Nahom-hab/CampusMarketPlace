@@ -1,9 +1,11 @@
-import Admin from '../models/admin.js';
-import jwt from 'jsonwebtoken';
-import { transporter } from "../config/transporter.config.js";
-import crypto from 'crypto'
+const Admin = require('../models/admin');
+const jwt = require('jsonwebtoken');
+const { transporter } = require("../config/transporter.config");
+const crypto = require('crypto');
+const bcryptjs = require('bcryptjs');
+
 // Signup
-export const signup = async (req, res) => {
+const signup = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
@@ -32,7 +34,7 @@ export const signup = async (req, res) => {
     }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -63,9 +65,7 @@ export const login = async (req, res) => {
     }
 };
 
-
-
-export const forgetPassowrd = async (req, res) => {
+const forgetPassowrd = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
@@ -81,7 +81,7 @@ export const forgetPassowrd = async (req, res) => {
         // Generate a token
         const token = crypto.randomBytes(32).toString('hex');
 
-        // Save the token to the user's record (you might also want to set an expiry date)
+        // Save the token to the user's record
         admin.resetPasswordToken = token;
         admin.resetPasswordExpires = Date.now() + 3600000; // 1 hour
         await admin.save();
@@ -90,8 +90,6 @@ export const forgetPassowrd = async (req, res) => {
         const magicLink = `http://localhost:5173/admin/reset-password/${token}`;
 
         // Send email using nodemailer
-
-
         const mailOptions = {
             from: "nahomhabtamu147@gmail.com",
             to: email,
@@ -106,9 +104,9 @@ export const forgetPassowrd = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'An error occurred while sending the magic link.' });
     }
-}
+};
 
-export const Resetpassword = async (req, res) => {
+const Resetpassword = async (req, res) => {
     const { token } = req.params;
 
     try {
@@ -118,23 +116,27 @@ export const Resetpassword = async (req, res) => {
         });
 
         if (!admin) {
-            return res.status(400).json({ message: 'Invalid  or expired reset token' });
+            return res.status(400).json({ message: 'Invalid or expired reset token' });
         }
 
         const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
-        admin.password = hashedPassword
-        admin.save()
-        res.status(200).json({ message: 'sucsusfully reseted password Now you can login' });
+        admin.password = hashedPassword;
+        await admin.save();
+        res.status(200).json({ message: 'Successfully reset password. Now you can login' });
 
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while validating the token.' });
     }
-}
+};
 
-
-
-
-export const checkAdminStatus = async (req, res) => {
+const checkAdminStatus = async (req, res) => {
     res.status(200).json(req.admin);
+};
 
-}
+module.exports = {
+    signup,
+    login,
+    forgetPassowrd,
+    Resetpassword,
+    checkAdminStatus
+};

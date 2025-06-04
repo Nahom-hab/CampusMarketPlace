@@ -1,14 +1,14 @@
-import User from "../models/user.js";
-import bcryptjs from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import Otp from "../models/otp.js";
-import { transporter } from "../config/transporter.config.js";
-import crypto from 'crypto'
-import { sendEmailOtp } from "../config/sendOtp.js";
-import uploadImageToCloudinary from "../config/UploadToClaudinary.js";
+const User = require("../models/user.js");
+const bcryptjs = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const Otp = require("../models/otp.js");
+const { transporter } = require("../config/transporter.config.js");
+const crypto = require('crypto')
+const { sendEmailOtp } = require("../config/sendOtp.js");
+const uploadImageToCloudinary = require("../config/UploadToClaudinary.js");
 
 
-export const AUTH_google_github = async (req, res, next) => {
+const AUTH_google_github = async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (user) {
@@ -46,9 +46,9 @@ export const AUTH_google_github = async (req, res, next) => {
 };
 
 
-export const loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
     const { email, password } = req.body;
-
+    console.log(req.body)
     try {
         const user = await User.findOne({ email });
         if (!user) {
@@ -63,17 +63,18 @@ export const loginUser = async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         const { password: pass, ...otherUserData } = user._doc;
 
-        res
-            .cookie('access_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' })
-            .status(200)
-            .json({ message: "Login successful", user: otherUserData });
+        // Return token in response body instead of cookie
+        res.status(200).json({
+            message: "Login successful",
+            user: otherUserData,
+            token // Send token in response
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Something went wrong" });
     }
 };
-
-export const signout = (req, res, next) => {
+const signout = (req, res, next) => {
     try {
         res.clearCookie("access_token", { path: "/", domain: "yourdomain.com" });
         res.status(200).json("User logged out");
@@ -83,51 +84,105 @@ export const signout = (req, res, next) => {
 };
 
 
+const updateUserProfile = async (req, res) => {
+    console.log(req.body)
+    const { name, email, university, bio } = req.body;
+    try {
+        console.log(req.body)
+        const user = await User.findById(req.params.id);
+        // // Handle image if uploaded
+        let imageUrl = '';
+        if (req.file) {
+            imageUrl = await uploadImageToCloudinary(req.file);
+            // Implement this function or use a cloud service SDK
+        }
+        if (user) {
+            user.name = name || user.name;
+            user.email = email || user.email;
+            user.university = university || user.university;
+            user.bio = bio || user.bio;
+            user.image = imageUrl || user.image;
 
+            const updatedUser = await user.save();
 
-export const signupUser = async (req, res) => {
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                university: updatedUser.university,
+                bio: updatedUser.bio,
+                image: updatedUser.image
+            });
+        } else {
+            res.status(404);
+            throw new Error('User not found');
+        }
+    } catch (error) {
+        console.error("editing user  error:", error);
+        res.status(500).json({
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+}
+
+// Controller:
+const signupUser = async (req, res) => {
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+
     const { name, email, password, university } = req.body;
 
     try {
+        // Validate required fields
+        if (!name || !email || !password || !university) {
+            return res.status(400).json({
+                message: "All fields are required"
+            });
+        }
+
+        // Handle image if uploaded
+        let imageUrl = '';
+        if (req.file) {
+            imageUrl = await uploadImageToCloudinary(req.file);
+            // Implement this function or use a cloud service SDK
+        }
+
+        // Check if user exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(409).json({ message: "Email is already registered" });
+            return res.status(409).json({ message: "Email already registered" });
         }
 
-        let url = "";
-
-        if (req.file) {
-            try {
-                url = await uploadImageToCloudinary(req.file);
-            } catch (error) {
-                console.error("Error uploading image to Cloudinary:", error);
-                return res.status(500).json({ error: "Failed to upload image" });
-            }
-        }
-
+        // Create new user
         const hashedPassword = bcryptjs.hashSync(password, 10);
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
             university,
-            prodile: url
+            profileImage: imageUrl || undefined
         });
 
         const savedUser = await newUser.save();
         const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-        const { password: pass, ...otherUserData } = savedUser._doc;
-        res
-            .cookie("access_token", token, { httpOnly: true })
-            .status(201)
-            .json({ message: "User registered successfully", user: otherUserData });
+
+        const { password: _, ...userData } = savedUser._doc;
+        res.status(201).json({
+            message: "User registered successfully",
+            user: userData,
+            token
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Something went wrong" });
+        console.error("Signup error:", error);
+        res.status(500).json({
+            message: "Internal server error",
+            error: error.message
+        });
     }
 };
 
-export const sendOtp = async (req, res) => {
+const sendOtp = async (req, res) => {
     const email = req.body.email;
     console.log(email);
 
@@ -159,7 +214,7 @@ export const sendOtp = async (req, res) => {
 };
 
 // Verify OTP function
-export const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
     try {
         const otpData = await Otp.findOne({ email });
@@ -179,7 +234,8 @@ export const verifyOtp = async (req, res) => {
     }
 };
 
-export const userExists = async (req, res, next) => {
+
+const userExists = async (req, res, next) => {
     const { email } = req.body;
     try {
         const userByEmail = await User.findOne({ email });
@@ -195,11 +251,11 @@ export const userExists = async (req, res, next) => {
 };
 
 
-export const forgetPassowrd = async (req, res) => {
+const forgetPassowrd = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
+        return res.status(400).json({ message: 'Email is require' });
     }
 
     try {
@@ -238,7 +294,7 @@ export const forgetPassowrd = async (req, res) => {
     }
 }
 
-export const Resetpassword = async (req, res) => {
+const Resetpassword = async (req, res) => {
     const { token } = req.params;
 
     try {
@@ -262,8 +318,33 @@ export const Resetpassword = async (req, res) => {
 }
 
 
+const userInfo = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select("-password");
+        res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while fetching user info.' });
+    }
+}
 
-export const checkStatus = async (req, res) => {
+
+const checkStatus = async (req, res) => {
     res.status(200).json(req.user);
 }
 
+
+module.exports = {
+    AUTH_google_github,
+    checkStatus,
+    Resetpassword,
+    verifyOtp,
+    userExists,
+    signupUser,
+    signout,
+    userInfo,
+    loginUser,
+    updateUserProfile,
+    sendOtp,
+    forgetPassowrd
+}
